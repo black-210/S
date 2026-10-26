@@ -1,0 +1,258 @@
+{
+  "name": "riposte-extension",
+  "displayName": "RIPOSTE — Native Clang/LLVM + Rust + Gemini AI Extension",
+  "description": "Complete Native Clang/LLVM and Rust development environment with Gemini 3.8 Flash AI assistant, Ghost Text, and Termux ARM64 support.",
+  "version": "1.0.0",
+  "publisher": "aistudio-build",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "AI",
+    "Linters",
+    "Formatters",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:rust",
+    "onLanguage:c",
+    "onLanguage:cpp",
+    "onLanguage:objective-c",
+    "onLanguage:objective-cpp",
+    "onCommand:riposte.detectToolchains",
+    "onCommand:riposte.ai.openChat"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "riposte-sidebar",
+          "title": "RIPOSTE AI",
+          "icon": "media/riposte-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "riposte-sidebar": [
+        {
+          "type": "webview",
+          "id": "riposte.chatView",
+          "name": "RIPOSTE AI Assistant"
+        },
+        {
+          "id": "riposte.toolchainView",
+          "name": "Native Toolchains & Diagnostics"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "riposte.detectToolchains",
+        "title": "RIPOSTE: Detect Toolchains",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.showCompilerInfo",
+        "title": "RIPOSTE: Show Compiler Information",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.validateToolchain",
+        "title": "RIPOSTE: Validate Toolchain",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.checkEnvironment",
+        "title": "RIPOSTE: Check Environment",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.inspectDependencies",
+        "title": "RIPOSTE: Inspect Dependencies",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.generateSupportReport",
+        "title": "RIPOSTE: Generate Support Report",
+        "category": "RIPOSTE"
+      },
+      {
+        "command": "riposte.cargoCheck",
+        "title": "RIPOSTE: Cargo Check",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.cargoBuild",
+        "title": "RIPOSTE: Cargo Build",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.cargoTest",
+        "title": "RIPOSTE: Cargo Test",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.cargoRun",
+        "title": "RIPOSTE: Cargo Run",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.cargoClippy",
+        "title": "RIPOSTE: Cargo Clippy",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.formatRustFile",
+        "title": "RIPOSTE: Format Rust File",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.inspectCargoWorkspace",
+        "title": "RIPOSTE: Inspect Cargo Workspace",
+        "category": "RIPOSTE Rust"
+      },
+      {
+        "command": "riposte.clangdConfigure",
+        "title": "RIPOSTE: Configure clangd",
+        "category": "RIPOSTE C/C++"
+      },
+      {
+        "command": "riposte.findCompilationDatabase",
+        "title": "RIPOSTE: Find Compilation Database",
+        "category": "RIPOSTE C/C++"
+      },
+      {
+        "command": "riposte.generateCompilationDatabase",
+        "title": "RIPOSTE: Generate Compilation Database",
+        "category": "RIPOSTE C/C++"
+      },
+      {
+        "command": "riposte.runClangTidy",
+        "title": "RIPOSTE: Run Clang-Tidy",
+        "category": "RIPOSTE C/C++"
+      },
+      {
+        "command": "riposte.formatCppFile",
+        "title": "RIPOSTE: Format C/C++ File",
+        "category": "RIPOSTE C/C++"
+      },
+      {
+        "command": "riposte.ai.configureGemini",
+        "title": "RIPOSTE AI: Configure Gemini",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.testConnection",
+        "title": "RIPOSTE AI: Test Gemini Connection",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.openChat",
+        "title": "RIPOSTE AI: Open AI Chat",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.explainSelection",
+        "title": "RIPOSTE AI: Explain Selection",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.explainCurrentFile",
+        "title": "RIPOSTE AI: Explain Current File",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.fixSelectedCode",
+        "title": "RIPOSTE AI: Fix Selected Code",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.refactorSelectedCode",
+        "title": "RIPOSTE AI: Refactor Selected Code",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.generateUnitTests",
+        "title": "RIPOSTE AI: Generate Unit Tests",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.generateDocumentation",
+        "title": "RIPOSTE AI: Generate Documentation",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.explainCompilerError",
+        "title": "RIPOSTE AI: Explain Compiler Error",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.explainRustError",
+        "title": "RIPOSTE AI: Explain Rust Diagnostic",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.reviewSecurity",
+        "title": "RIPOSTE AI: Review Security of Selection",
+        "category": "RIPOSTE AI"
+      },
+      {
+        "command": "riposte.ai.applyApprovedPatch",
+        "title": "RIPOSTE AI: Apply Approved Patch",
+        "category": "RIPOSTE AI"
+      }
+    ],
+    "configuration": {
+      "title": "RIPOSTE Extension",
+      "properties": {
+        "riposte.gemini.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for Gemini AI capabilities. Leave empty to use system secrets or GEMINI_API_KEY environment variable."
+        },
+        "riposte.gemini.model": {
+          "type": "string",
+          "default": "gemini-3.8-flash",
+          "description": "Gemini model to use for code generation, chat, and ghost text."
+        },
+        "riposte.ghostText.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Ghost Text inline code completions at cursor."
+        },
+        "riposte.ghostText.debounceMs": {
+          "type": "number",
+          "default": 250,
+          "description": "Debounce delay in milliseconds before requesting Ghost Text inline completions."
+        },
+        "riposte.rust.cargoPath": {
+          "type": "string",
+          "default": "cargo",
+          "description": "Path to cargo binary."
+        },
+        "riposte.rust.rustAnalyzerPath": {
+          "type": "string",
+          "default": "rust-analyzer",
+          "description": "Path to rust-analyzer binary."
+        },
+        "riposte.clang.clangdPath": {
+          "type": "string",
+          "default": "clangd",
+          "description": "Path to clangd binary."
+        },
+        "riposte.clang.clangPath": {
+          "type": "string",
+          "default": "clang",
+          "description": "Path to clang/clang++ compiler."
+        },
+        "riposte.termux.autoDetect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically detect Termux Android ARM64 paths (/data/data/com.termux/files/usr/bin)."
+        }
+      }
+    }
+  }
+}

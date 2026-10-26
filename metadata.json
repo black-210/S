@@ -1,0 +1,6 @@
+{
+  "name": "RIPOSTE — Native Clang/LLVM + Rust + Gemini AI Extension for Termux & Code OSS",
+  "description": "Complete Native Clang/LLVM and Rust toolchain integration with Gemini AI assistant, Ghost Text suggestions, interactive chat, patch previews, and Android ARM64 Termux support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
