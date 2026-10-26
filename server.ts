@@ -9,6 +9,10 @@ import { CargoManager } from './extension/src/rust/cargo.js';
 import { ClangManager } from './extension/src/clang/clangd.js';
 import { SecurityRedactor } from './extension/src/security/redactor.js';
 import { PatchEngine } from './extension/src/patch/patchEngine.js';
+import { ErrorFixerEngine } from './extension/src/autofix/errorFixerEngine.js';
+import { BlueGhostCompletionEngine } from './extension/src/ghostText/blueGhostEngine.js';
+import { CPP_STANDARD_HEADERS, POPULAR_CPP_LIBRARIES } from './extension/src/knowledge/cppLibraries.js';
+import { RUST_STANDARD_MODULES, POPULAR_RUST_CRATES } from './extension/src/knowledge/rustLibraries.js';
 import { execSync } from 'child_process';
 
 const app = express();
@@ -16,7 +20,6 @@ app.use(express.json());
 
 const PORT = 3000;
 
-// Initialize Gemini SDK with User-Agent header telemetry requirement
 const getAiClient = (apiKey?: string) => {
   const key = apiKey || process.env.GEMINI_API_KEY;
   if (!key) return null;
@@ -30,9 +33,9 @@ const getAiClient = (apiKey?: string) => {
   });
 };
 
-// 1. Gemini AI Proxy Endpoint
+// 1. Gemini AI Proxy Endpoint with Optional Search Grounding for Live Web Documentation Search
 app.post('/api/gemini/generate', async (req, res) => {
-  const { prompt, systemInstruction, codeContext, language, model, temperature } = req.body;
+  const { prompt, systemInstruction, codeContext, language, model, temperature, enableSearchGrounding } = req.body;
   const customApiKey = req.headers['x-gemini-api-key'] as string;
 
   const ai = getAiClient(customApiKey);
@@ -45,13 +48,19 @@ app.post('/api/gemini/generate', async (req, res) => {
   try {
     const fullPrompt = codeContext ? `Context:\n${codeContext}\n\nTask:\n${prompt}` : prompt;
     
+    const config: any = {
+      systemInstruction: systemInstruction || 'You are RIPOSTE, an expert software compiler and C/C++ / Rust engineering AI assistant with deep knowledge of all libraries.',
+      temperature: temperature ?? 0.2
+    };
+
+    if (enableSearchGrounding) {
+      config.tools = [{ googleSearch: {} }];
+    }
+
     const response = await ai.models.generateContent({
       model: modelName,
       contents: fullPrompt,
-      config: {
-        systemInstruction: systemInstruction || 'You are RIPOSTE, an expert software compiler and C/C++ / Rust engineering AI assistant.',
-        temperature: temperature ?? 0.2
-      }
+      config
     });
 
     const outputText = response.text || '';
@@ -62,7 +71,55 @@ app.post('/api/gemini/generate', async (req, res) => {
   }
 });
 
-// 2. Gemini Connectivity Test Endpoint
+// 2. Auto-Fix Diagnostic Errors Endpoint for C, C++, and Rust
+app.post('/api/autofix/analyze', (req, res) => {
+  const { documentText, filePath, diagnostics } = req.body;
+  if (!documentText || !filePath || !diagnostics) {
+    return res.status(400).json({ error: 'Missing documentText, filePath, or diagnostics' });
+  }
+
+  const fixes = ErrorFixerEngine.analyzeAndFixDocument(documentText, filePath, diagnostics);
+  return res.json({ success: true, fixesCount: fixes.length, fixes });
+});
+
+// 3. Blue Ghost Text Completion Endpoint
+app.post('/api/ghost/blue-completion', async (req, res) => {
+  const { prefix, suffix, languageId } = req.body;
+  const ai = getAiClient();
+  const engine = new BlueGhostCompletionEngine(ai as any);
+  const result = await engine.generateBlueCompletion(prefix || '', suffix || '', languageId || 'cpp');
+  return res.json(result);
+});
+
+// 4. Library Knowledge Search Endpoint (C, C++, Rust)
+app.get('/api/libraries/search', (req, res) => {
+  const query = ((req.query.q as string) || '').toLowerCase();
+
+  const cppHeaders = CPP_STANDARD_HEADERS.filter(
+    h => h.header.toLowerCase().includes(query) || h.description.toLowerCase().includes(query) || h.symbols.some(s => s.toLowerCase().includes(query))
+  );
+
+  const cppLibs = POPULAR_CPP_LIBRARIES.filter(
+    l => l.name.toLowerCase().includes(query) || l.desc.toLowerCase().includes(query) || l.headers.some(h => h.toLowerCase().includes(query))
+  );
+
+  const rustModules = RUST_STANDARD_MODULES.filter(
+    m => m.path.toLowerCase().includes(query) || m.desc.toLowerCase().includes(query) || m.symbols.some(s => s.toLowerCase().includes(query))
+  );
+
+  const rustCrates = POPULAR_RUST_CRATES.filter(
+    c => c.name.toLowerCase().includes(query) || c.description.toLowerCase().includes(query) || c.modules.some(m => m.toLowerCase().includes(query))
+  );
+
+  return res.json({
+    cppHeaders,
+    cppLibs,
+    rustModules,
+    rustCrates
+  });
+});
+
+// 5. Connectivity Test
 app.get('/api/gemini/test-connection', async (req, res) => {
   const ai = getAiClient();
   if (!ai) {
@@ -75,26 +132,19 @@ app.get('/api/gemini/test-connection', async (req, res) => {
       contents: 'Ping test. Reply with PONG.'
     });
 
-    return res.json({
-      connected: true,
-      text: response.text,
-      modelUsed: 'gemini-3.8-flash'
-    });
+    return res.json({ connected: true, text: response.text, modelUsed: 'gemini-3.8-flash' });
   } catch (err: any) {
-    return res.json({
-      connected: false,
-      message: err?.message || 'Connection failed'
-    });
+    return res.json({ connected: false, message: err?.message || 'Connection failed' });
   }
 });
 
-// 3. Toolchain & Environment Diagnostics Endpoint
+// 6. Environment Diagnostics Endpoint
 app.get('/api/diagnostics/toolchain', (req, res) => {
   const report = TermuxDetector.detectEnvironment();
   return res.json(report);
 });
 
-// 4. Code Execution Sandbox Endpoint (Rust & Clang)
+// 7. Compiler Sandbox
 app.post('/api/sandbox/compile', (req, res) => {
   const { language, code } = req.body;
   
@@ -137,7 +187,7 @@ app.post('/api/sandbox/compile', (req, res) => {
   return res.status(400).json({ error: 'Unsupported sandbox language' });
 });
 
-// 5. VSIX Info & Download Endpoints
+// 8. VSIX Download & Info
 app.get('/api/vsix/info', (req, res) => {
   const vsixPath = path.join(process.cwd(), 'riposte-extension-1.0.0.vsix');
   if (!fs.existsSync(vsixPath)) {
@@ -164,16 +214,6 @@ app.get('/api/vsix/download', (req, res) => {
   res.setHeader('Content-Type', 'application/vsix');
   res.setHeader('Content-Disposition', 'attachment; filename="riposte-extension-1.0.0.vsix"');
   return res.sendFile(vsixPath);
-});
-
-// 6. Test Runner Endpoint
-app.post('/api/tests/run', (req, res) => {
-  try {
-    const out = execSync('npx tsx scripts/run-tests.ts', { encoding: 'utf-8', timeout: 10000 });
-    return res.json({ success: true, log: out });
-  } catch (err: any) {
-    return res.json({ success: false, log: err.stdout || err.stderr || err.message });
-  }
 });
 
 async function startServer() {

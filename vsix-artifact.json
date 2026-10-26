@@ -1,7 +1,8 @@
 {
   "fileName": "riposte-extension-1.0.0.vsix",
   "filePath": "/app/applet/riposte-extension-1.0.0.vsix",
-  "sizeBytes": 11881,
-  "sha256": "279d62f01a1b41cc92ace149cfadd5ee922aba4cfb76f78a1428aaa2d7fef692",
-  "buildTimestamp": "2026-10-26T18:53:47.245Z"
+  "sizeBytes": 4536391,
+  "sizeMB": "4.33",
+  "sha256": "676fdb819c3898c27e3c9ff3f4bff3b79ae5b5fae668f7f773f733c11fb162a0",
+  "buildTimestamp": "2026-10-26T19:10:44.062Z"
 }
